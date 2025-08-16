@@ -1,0 +1,905 @@
+
+Terminator found in the middle of a basic block!
+label %then
+Terminator found in the middle of a basic block!
+label %then18
+Terminator found in the middle of a basic block!
+label %then30
+; ModuleID = 'demo/e16.c'
+source_filename = "demo/e16.c"
+
+@0 = private constant [3 x i8] c"Q \00"
+@1 = private constant [3 x i8] c". \00"
+@2 = private constant [2 x i8] c"\0A\00"
+@3 = private constant [3 x i8] c"\0A\0A\00"
+
+declare i32 @printf(ptr, ...)
+
+define i32 @print_board(ptr %board) {
+entry:
+  %j = alloca i32, align 4
+  %i = alloca i32, align 4
+  %board1 = alloca ptr, align 8
+  store ptr %board, ptr %board1, align 8
+  br label %for.init
+
+for.init:                                         ; preds = %entry
+  store i32 0, ptr %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc11, %for.init
+  %i2 = load i32, ptr %i, align 4
+  %0 = icmp slt i32 %i2, 10
+  %1 = sext i1 %0 to i32
+  %2 = icmp ne i32 %1, 0
+  br i1 %2, label %for.body, label %for.last13
+
+for.body:                                         ; preds = %for.cond
+  br label %for.init3
+
+for.init3:                                        ; preds = %for.body
+  store i32 0, ptr %j, align 4
+  br label %for.cond4
+
+for.cond4:                                        ; preds = %for.inc, %for.init3
+  %j5 = load i32, ptr %j, align 4
+  %3 = icmp slt i32 %j5, 10
+  %4 = sext i1 %3 to i32
+  %5 = icmp ne i32 %4, 0
+  br i1 %5, label %for.body6, label %for.last
+
+for.body6:                                        ; preds = %for.cond4
+  br label %cond
+
+cond:                                             ; preds = %for.body6
+  %board7 = load ptr, ptr %board1, align 8
+  %i8 = load i32, ptr %i, align 4
+  %6 = getelementptr inbounds [10 x i32], ptr %board7, i32 %i8
+  %7 = load [10 x i32], ptr %6, align 4
+  %j9 = load i32, ptr %j, align 4
+  %8 = getelementptr inbounds i32, ptr %6, i32 %j9
+  %9 = load i32, ptr %8, align 4
+  %10 = icmp ne i32 %9, 0
+  br i1 %10, label %then, label %else
+
+then:                                             ; preds = %cond
+  %11 = call i32 (ptr, ...) @printf(ptr @0)
+  br label %last
+
+else:                                             ; preds = %cond
+  %12 = call i32 (ptr, ...) @printf(ptr @1)
+  br label %last
+
+last:                                             ; preds = %else, %then
+  br label %for.inc
+
+for.inc:                                          ; preds = %last
+  %j10 = load i32, ptr %j, align 4
+  %13 = add i32 %j10, 1
+  store i32 %13, ptr %j, align 4
+  br label %for.cond4
+
+for.last:                                         ; preds = %for.cond4
+  %14 = call i32 (ptr, ...) @printf(ptr @2)
+  br label %for.inc11
+
+for.inc11:                                        ; preds = %for.last
+  %i12 = load i32, ptr %i, align 4
+  %15 = add i32 %i12, 1
+  store i32 %15, ptr %i, align 4
+  br label %for.cond
+
+for.last13:                                       ; preds = %for.cond
+  %16 = call i32 (ptr, ...) @printf(ptr @3)
+  ret i32 0
+}
+
+define i32 @conflict(ptr %board, i32 %row, i32 %col) {
+entry:
+  %j = alloca i32, align 4
+  %i = alloca i32, align 4
+  %board1 = alloca ptr, align 8
+  store ptr %board, ptr %board1, align 8
+  %row2 = alloca i32, align 4
+  store i32 %row, ptr %row2, align 4
+  %col3 = alloca i32, align 4
+  store i32 %col, ptr %col3, align 4
+  br label %for.init
+
+for.init:                                         ; preds = %entry
+  store i32 0, ptr %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc, %for.init
+  %i4 = load i32, ptr %i, align 4
+  %row5 = load i32, ptr %row2, align 4
+  %0 = icmp slt i32 %i4, %row5
+  %1 = sext i1 %0 to i32
+  %2 = icmp ne i32 %1, 0
+  br i1 %2, label %for.body, label %for.last
+
+for.body:                                         ; preds = %for.cond
+  br label %cond
+
+cond:                                             ; preds = %for.body
+  %board6 = load ptr, ptr %board1, align 8
+  %i7 = load i32, ptr %i, align 4
+  %3 = getelementptr inbounds [10 x i32], ptr %board6, i32 %i7
+  %4 = load [10 x i32], ptr %3, align 4
+  %col8 = load i32, ptr %col3, align 4
+  %5 = getelementptr inbounds i32, ptr %3, i32 %col8
+  %6 = load i32, ptr %5, align 4
+  %7 = icmp ne i32 %6, 0
+  br i1 %7, label %then, label %last
+
+then:                                             ; preds = %cond
+  ret i32 1
+  br label %last
+
+last:                                             ; preds = %then, %cond
+  %row9 = load i32, ptr %row2, align 4
+  %i10 = load i32, ptr %i, align 4
+  %8 = sub nsw i32 %row9, %i10
+  store i32 %8, ptr %j, align 4
+  br label %cond11
+
+cond11:                                           ; preds = %last
+  %col12 = load i32, ptr %col3, align 4
+  %j13 = load i32, ptr %j, align 4
+  %9 = sub nsw i32 %col12, %j13
+  %10 = add nsw i32 %9, 1
+  %11 = icmp slt i32 0, %10
+  %12 = sext i1 %11 to i32
+  %13 = icmp ne i32 %12, 0
+  br i1 %13, label %nextBB, label %falseBB
+
+nextBB:                                           ; preds = %cond11
+  %board14 = load ptr, ptr %board1, align 8
+  %i15 = load i32, ptr %i, align 4
+  %14 = getelementptr inbounds [10 x i32], ptr %board14, i32 %i15
+  %15 = load [10 x i32], ptr %14, align 4
+  %col16 = load i32, ptr %col3, align 4
+  %j17 = load i32, ptr %j, align 4
+  %16 = sub nsw i32 %col16, %j17
+  %17 = getelementptr inbounds i32, ptr %14, i32 %16
+  %18 = load i32, ptr %17, align 4
+  %19 = icmp ne i32 %18, 0
+  %20 = zext i1 %19 to i32
+  br label %mergeBB
+
+falseBB:                                          ; preds = %cond11
+  br label %mergeBB
+
+mergeBB:                                          ; preds = %falseBB, %nextBB
+  %21 = phi i32 [ %20, %nextBB ], [ 0, %falseBB ]
+  %22 = icmp ne i32 %21, 0
+  br i1 %22, label %then18, label %last19
+
+then18:                                           ; preds = %mergeBB
+  ret i32 1
+  br label %last19
+
+last19:                                           ; preds = %then18, %mergeBB
+  br label %cond20
+
+cond20:                                           ; preds = %last19
+  %col22 = load i32, ptr %col3, align 4
+  %j23 = load i32, ptr %j, align 4
+  %23 = add nsw i32 %col22, %j23
+  %24 = icmp slt i32 %23, 10
+  %25 = sext i1 %24 to i32
+  %26 = icmp ne i32 %25, 0
+  br i1 %26, label %nextBB21, label %falseBB28
+
+nextBB21:                                         ; preds = %cond20
+  %board24 = load ptr, ptr %board1, align 8
+  %i25 = load i32, ptr %i, align 4
+  %27 = getelementptr inbounds [10 x i32], ptr %board24, i32 %i25
+  %28 = load [10 x i32], ptr %27, align 4
+  %col26 = load i32, ptr %col3, align 4
+  %j27 = load i32, ptr %j, align 4
+  %29 = add nsw i32 %col26, %j27
+  %30 = getelementptr inbounds i32, ptr %27, i32 %29
+  %31 = load i32, ptr %30, align 4
+  %32 = icmp ne i32 %31, 0
+  %33 = zext i1 %32 to i32
+  br label %mergeBB29
+
+falseBB28:                                        ; preds = %cond20
+  br label %mergeBB29
+
+mergeBB29:                                        ; preds = %falseBB28, %nextBB21
+  %34 = phi i32 [ %33, %nextBB21 ], [ 0, %falseBB28 ]
+  %35 = icmp ne i32 %34, 0
+  br i1 %35, label %then30, label %last31
+
+then30:                                           ; preds = %mergeBB29
+  ret i32 1
+  br label %last31
+
+last31:                                           ; preds = %then30, %mergeBB29
+  br label %for.inc
+
+for.inc:                                          ; preds = %last31
+  %i32 = load i32, ptr %i, align 4
+  %36 = add i32 %i32, 1
+  store i32 %36, ptr %i, align 4
+  br label %for.cond
+
+for.last:                                         ; preds = %for.cond
+  ret i32 0
+}
+Terminator found in the middle of a basic block!
+label %then
+Terminator found in the middle of a basic block!
+label %then18
+Terminator found in the middle of a basic block!
+label %then30
+Terminator found in the middle of a basic block!
+label %then
+; ModuleID = 'demo/e16.c'
+source_filename = "demo/e16.c"
+
+@0 = private constant [3 x i8] c"Q \00"
+@1 = private constant [3 x i8] c". \00"
+@2 = private constant [2 x i8] c"\0A\00"
+@3 = private constant [3 x i8] c"\0A\0A\00"
+
+declare i32 @printf(ptr, ...)
+
+define i32 @print_board(ptr %board) {
+entry:
+  %j = alloca i32, align 4
+  %i = alloca i32, align 4
+  %board1 = alloca ptr, align 8
+  store ptr %board, ptr %board1, align 8
+  br label %for.init
+
+for.init:                                         ; preds = %entry
+  store i32 0, ptr %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc11, %for.init
+  %i2 = load i32, ptr %i, align 4
+  %0 = icmp slt i32 %i2, 10
+  %1 = sext i1 %0 to i32
+  %2 = icmp ne i32 %1, 0
+  br i1 %2, label %for.body, label %for.last13
+
+for.body:                                         ; preds = %for.cond
+  br label %for.init3
+
+for.init3:                                        ; preds = %for.body
+  store i32 0, ptr %j, align 4
+  br label %for.cond4
+
+for.cond4:                                        ; preds = %for.inc, %for.init3
+  %j5 = load i32, ptr %j, align 4
+  %3 = icmp slt i32 %j5, 10
+  %4 = sext i1 %3 to i32
+  %5 = icmp ne i32 %4, 0
+  br i1 %5, label %for.body6, label %for.last
+
+for.body6:                                        ; preds = %for.cond4
+  br label %cond
+
+cond:                                             ; preds = %for.body6
+  %board7 = load ptr, ptr %board1, align 8
+  %i8 = load i32, ptr %i, align 4
+  %6 = getelementptr inbounds [10 x i32], ptr %board7, i32 %i8
+  %7 = load [10 x i32], ptr %6, align 4
+  %j9 = load i32, ptr %j, align 4
+  %8 = getelementptr inbounds i32, ptr %6, i32 %j9
+  %9 = load i32, ptr %8, align 4
+  %10 = icmp ne i32 %9, 0
+  br i1 %10, label %then, label %else
+
+then:                                             ; preds = %cond
+  %11 = call i32 (ptr, ...) @printf(ptr @0)
+  br label %last
+
+else:                                             ; preds = %cond
+  %12 = call i32 (ptr, ...) @printf(ptr @1)
+  br label %last
+
+last:                                             ; preds = %else, %then
+  br label %for.inc
+
+for.inc:                                          ; preds = %last
+  %j10 = load i32, ptr %j, align 4
+  %13 = add i32 %j10, 1
+  store i32 %13, ptr %j, align 4
+  br label %for.cond4
+
+for.last:                                         ; preds = %for.cond4
+  %14 = call i32 (ptr, ...) @printf(ptr @2)
+  br label %for.inc11
+
+for.inc11:                                        ; preds = %for.last
+  %i12 = load i32, ptr %i, align 4
+  %15 = add i32 %i12, 1
+  store i32 %15, ptr %i, align 4
+  br label %for.cond
+
+for.last13:                                       ; preds = %for.cond
+  %16 = call i32 (ptr, ...) @printf(ptr @3)
+  ret i32 0
+}
+
+define i32 @conflict(ptr %board, i32 %row, i32 %col) {
+entry:
+  %j = alloca i32, align 4
+  %i = alloca i32, align 4
+  %board1 = alloca ptr, align 8
+  store ptr %board, ptr %board1, align 8
+  %row2 = alloca i32, align 4
+  store i32 %row, ptr %row2, align 4
+  %col3 = alloca i32, align 4
+  store i32 %col, ptr %col3, align 4
+  br label %for.init
+
+for.init:                                         ; preds = %entry
+  store i32 0, ptr %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc, %for.init
+  %i4 = load i32, ptr %i, align 4
+  %row5 = load i32, ptr %row2, align 4
+  %0 = icmp slt i32 %i4, %row5
+  %1 = sext i1 %0 to i32
+  %2 = icmp ne i32 %1, 0
+  br i1 %2, label %for.body, label %for.last
+
+for.body:                                         ; preds = %for.cond
+  br label %cond
+
+cond:                                             ; preds = %for.body
+  %board6 = load ptr, ptr %board1, align 8
+  %i7 = load i32, ptr %i, align 4
+  %3 = getelementptr inbounds [10 x i32], ptr %board6, i32 %i7
+  %4 = load [10 x i32], ptr %3, align 4
+  %col8 = load i32, ptr %col3, align 4
+  %5 = getelementptr inbounds i32, ptr %3, i32 %col8
+  %6 = load i32, ptr %5, align 4
+  %7 = icmp ne i32 %6, 0
+  br i1 %7, label %then, label %last
+
+then:                                             ; preds = %cond
+  ret i32 1
+  br label %last
+
+last:                                             ; preds = %then, %cond
+  %row9 = load i32, ptr %row2, align 4
+  %i10 = load i32, ptr %i, align 4
+  %8 = sub nsw i32 %row9, %i10
+  store i32 %8, ptr %j, align 4
+  br label %cond11
+
+cond11:                                           ; preds = %last
+  %col12 = load i32, ptr %col3, align 4
+  %j13 = load i32, ptr %j, align 4
+  %9 = sub nsw i32 %col12, %j13
+  %10 = add nsw i32 %9, 1
+  %11 = icmp slt i32 0, %10
+  %12 = sext i1 %11 to i32
+  %13 = icmp ne i32 %12, 0
+  br i1 %13, label %nextBB, label %falseBB
+
+nextBB:                                           ; preds = %cond11
+  %board14 = load ptr, ptr %board1, align 8
+  %i15 = load i32, ptr %i, align 4
+  %14 = getelementptr inbounds [10 x i32], ptr %board14, i32 %i15
+  %15 = load [10 x i32], ptr %14, align 4
+  %col16 = load i32, ptr %col3, align 4
+  %j17 = load i32, ptr %j, align 4
+  %16 = sub nsw i32 %col16, %j17
+  %17 = getelementptr inbounds i32, ptr %14, i32 %16
+  %18 = load i32, ptr %17, align 4
+  %19 = icmp ne i32 %18, 0
+  %20 = zext i1 %19 to i32
+  br label %mergeBB
+
+falseBB:                                          ; preds = %cond11
+  br label %mergeBB
+
+mergeBB:                                          ; preds = %falseBB, %nextBB
+  %21 = phi i32 [ %20, %nextBB ], [ 0, %falseBB ]
+  %22 = icmp ne i32 %21, 0
+  br i1 %22, label %then18, label %last19
+
+then18:                                           ; preds = %mergeBB
+  ret i32 1
+  br label %last19
+
+last19:                                           ; preds = %then18, %mergeBB
+  br label %cond20
+
+cond20:                                           ; preds = %last19
+  %col22 = load i32, ptr %col3, align 4
+  %j23 = load i32, ptr %j, align 4
+  %23 = add nsw i32 %col22, %j23
+  %24 = icmp slt i32 %23, 10
+  %25 = sext i1 %24 to i32
+  %26 = icmp ne i32 %25, 0
+  br i1 %26, label %nextBB21, label %falseBB28
+
+nextBB21:                                         ; preds = %cond20
+  %board24 = load ptr, ptr %board1, align 8
+  %i25 = load i32, ptr %i, align 4
+  %27 = getelementptr inbounds [10 x i32], ptr %board24, i32 %i25
+  %28 = load [10 x i32], ptr %27, align 4
+  %col26 = load i32, ptr %col3, align 4
+  %j27 = load i32, ptr %j, align 4
+  %29 = add nsw i32 %col26, %j27
+  %30 = getelementptr inbounds i32, ptr %27, i32 %29
+  %31 = load i32, ptr %30, align 4
+  %32 = icmp ne i32 %31, 0
+  %33 = zext i1 %32 to i32
+  br label %mergeBB29
+
+falseBB28:                                        ; preds = %cond20
+  br label %mergeBB29
+
+mergeBB29:                                        ; preds = %falseBB28, %nextBB21
+  %34 = phi i32 [ %33, %nextBB21 ], [ 0, %falseBB28 ]
+  %35 = icmp ne i32 %34, 0
+  br i1 %35, label %then30, label %last31
+
+then30:                                           ; preds = %mergeBB29
+  ret i32 1
+  br label %last31
+
+last31:                                           ; preds = %then30, %mergeBB29
+  br label %for.inc
+
+for.inc:                                          ; preds = %last31
+  %i32 = load i32, ptr %i, align 4
+  %36 = add i32 %i32, 1
+  store i32 %36, ptr %i, align 4
+  br label %for.cond
+
+for.last:                                         ; preds = %for.cond
+  ret i32 0
+}
+
+define i32 @solve(ptr %board, i32 %row) {
+entry:
+  %i = alloca i32, align 4
+  %board1 = alloca ptr, align 8
+  store ptr %board, ptr %board1, align 8
+  %row2 = alloca i32, align 4
+  store i32 %row, ptr %row2, align 4
+  br label %cond
+
+cond:                                             ; preds = %entry
+  %row3 = load i32, ptr %row2, align 4
+  %0 = icmp sgt i32 %row3, 9
+  %1 = sext i1 %0 to i32
+  %2 = icmp ne i32 %1, 0
+  br i1 %2, label %then, label %last
+
+then:                                             ; preds = %cond
+  %board4 = load ptr, ptr %board1, align 8
+  %3 = call i32 @print_board(ptr %board4)
+  ret i32 0
+  br label %last
+
+last:                                             ; preds = %then, %cond
+  br label %for.init
+
+for.init:                                         ; preds = %last
+  store i32 0, ptr %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc, %for.init
+  %i5 = load i32, ptr %i, align 4
+  %4 = icmp slt i32 %i5, 10
+  %5 = sext i1 %4 to i32
+  %6 = icmp ne i32 %5, 0
+  br i1 %6, label %for.body, label %for.last
+
+for.body:                                         ; preds = %for.cond
+  br label %cond6
+
+cond6:                                            ; preds = %for.body
+  %board7 = load ptr, ptr %board1, align 8
+  %row8 = load i32, ptr %row2, align 4
+  %i9 = load i32, ptr %i, align 4
+  %7 = call i32 @conflict(ptr %board7, i32 %row8, i32 %i9)
+  %8 = icmp ne i32 %7, 0
+  br i1 %8, label %then10, label %else
+
+then10:                                           ; preds = %cond6
+  br label %last19
+
+else:                                             ; preds = %cond6
+  %board11 = load ptr, ptr %board1, align 8
+  %row12 = load i32, ptr %row2, align 4
+  %9 = getelementptr inbounds [10 x i32], ptr %board11, i32 %row12
+  %10 = load [10 x i32], ptr %9, align 4
+  %i13 = load i32, ptr %i, align 4
+  %11 = getelementptr inbounds i32, ptr %9, i32 %i13
+  %12 = load i32, ptr %11, align 4
+  store i32 1, ptr %11, align 4
+  %board14 = load ptr, ptr %board1, align 8
+  %row15 = load i32, ptr %row2, align 4
+  %13 = add nsw i32 %row15, 1
+  %14 = call i32 @solve(ptr %board14, i32 %13)
+  %board16 = load ptr, ptr %board1, align 8
+  %row17 = load i32, ptr %row2, align 4
+  %15 = getelementptr inbounds [10 x i32], ptr %board16, i32 %row17
+  %16 = load [10 x i32], ptr %15, align 4
+  %i18 = load i32, ptr %i, align 4
+  %17 = getelementptr inbounds i32, ptr %15, i32 %i18
+  %18 = load i32, ptr %17, align 4
+  store i32 0, ptr %17, align 4
+  br label %last19
+
+last19:                                           ; preds = %else, %then10
+  br label %for.inc
+
+for.inc:                                          ; preds = %last19
+  %i20 = load i32, ptr %i, align 4
+  %19 = add i32 %i20, 1
+  store i32 %19, ptr %i, align 4
+  br label %for.cond
+
+for.last:                                         ; preds = %for.cond
+  ret i32 0
+}
+Terminator found in the middle of a basic block!
+label %then
+Terminator found in the middle of a basic block!
+label %then18
+Terminator found in the middle of a basic block!
+label %then30
+Terminator found in the middle of a basic block!
+label %then
+; ModuleID = 'demo/e16.c'
+source_filename = "demo/e16.c"
+
+@0 = private constant [3 x i8] c"Q \00"
+@1 = private constant [3 x i8] c". \00"
+@2 = private constant [2 x i8] c"\0A\00"
+@3 = private constant [3 x i8] c"\0A\0A\00"
+
+declare i32 @printf(ptr, ...)
+
+define i32 @print_board(ptr %board) {
+entry:
+  %j = alloca i32, align 4
+  %i = alloca i32, align 4
+  %board1 = alloca ptr, align 8
+  store ptr %board, ptr %board1, align 8
+  br label %for.init
+
+for.init:                                         ; preds = %entry
+  store i32 0, ptr %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc11, %for.init
+  %i2 = load i32, ptr %i, align 4
+  %0 = icmp slt i32 %i2, 10
+  %1 = sext i1 %0 to i32
+  %2 = icmp ne i32 %1, 0
+  br i1 %2, label %for.body, label %for.last13
+
+for.body:                                         ; preds = %for.cond
+  br label %for.init3
+
+for.init3:                                        ; preds = %for.body
+  store i32 0, ptr %j, align 4
+  br label %for.cond4
+
+for.cond4:                                        ; preds = %for.inc, %for.init3
+  %j5 = load i32, ptr %j, align 4
+  %3 = icmp slt i32 %j5, 10
+  %4 = sext i1 %3 to i32
+  %5 = icmp ne i32 %4, 0
+  br i1 %5, label %for.body6, label %for.last
+
+for.body6:                                        ; preds = %for.cond4
+  br label %cond
+
+cond:                                             ; preds = %for.body6
+  %board7 = load ptr, ptr %board1, align 8
+  %i8 = load i32, ptr %i, align 4
+  %6 = getelementptr inbounds [10 x i32], ptr %board7, i32 %i8
+  %7 = load [10 x i32], ptr %6, align 4
+  %j9 = load i32, ptr %j, align 4
+  %8 = getelementptr inbounds i32, ptr %6, i32 %j9
+  %9 = load i32, ptr %8, align 4
+  %10 = icmp ne i32 %9, 0
+  br i1 %10, label %then, label %else
+
+then:                                             ; preds = %cond
+  %11 = call i32 (ptr, ...) @printf(ptr @0)
+  br label %last
+
+else:                                             ; preds = %cond
+  %12 = call i32 (ptr, ...) @printf(ptr @1)
+  br label %last
+
+last:                                             ; preds = %else, %then
+  br label %for.inc
+
+for.inc:                                          ; preds = %last
+  %j10 = load i32, ptr %j, align 4
+  %13 = add i32 %j10, 1
+  store i32 %13, ptr %j, align 4
+  br label %for.cond4
+
+for.last:                                         ; preds = %for.cond4
+  %14 = call i32 (ptr, ...) @printf(ptr @2)
+  br label %for.inc11
+
+for.inc11:                                        ; preds = %for.last
+  %i12 = load i32, ptr %i, align 4
+  %15 = add i32 %i12, 1
+  store i32 %15, ptr %i, align 4
+  br label %for.cond
+
+for.last13:                                       ; preds = %for.cond
+  %16 = call i32 (ptr, ...) @printf(ptr @3)
+  ret i32 0
+}
+
+define i32 @conflict(ptr %board, i32 %row, i32 %col) {
+entry:
+  %j = alloca i32, align 4
+  %i = alloca i32, align 4
+  %board1 = alloca ptr, align 8
+  store ptr %board, ptr %board1, align 8
+  %row2 = alloca i32, align 4
+  store i32 %row, ptr %row2, align 4
+  %col3 = alloca i32, align 4
+  store i32 %col, ptr %col3, align 4
+  br label %for.init
+
+for.init:                                         ; preds = %entry
+  store i32 0, ptr %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc, %for.init
+  %i4 = load i32, ptr %i, align 4
+  %row5 = load i32, ptr %row2, align 4
+  %0 = icmp slt i32 %i4, %row5
+  %1 = sext i1 %0 to i32
+  %2 = icmp ne i32 %1, 0
+  br i1 %2, label %for.body, label %for.last
+
+for.body:                                         ; preds = %for.cond
+  br label %cond
+
+cond:                                             ; preds = %for.body
+  %board6 = load ptr, ptr %board1, align 8
+  %i7 = load i32, ptr %i, align 4
+  %3 = getelementptr inbounds [10 x i32], ptr %board6, i32 %i7
+  %4 = load [10 x i32], ptr %3, align 4
+  %col8 = load i32, ptr %col3, align 4
+  %5 = getelementptr inbounds i32, ptr %3, i32 %col8
+  %6 = load i32, ptr %5, align 4
+  %7 = icmp ne i32 %6, 0
+  br i1 %7, label %then, label %last
+
+then:                                             ; preds = %cond
+  ret i32 1
+  br label %last
+
+last:                                             ; preds = %then, %cond
+  %row9 = load i32, ptr %row2, align 4
+  %i10 = load i32, ptr %i, align 4
+  %8 = sub nsw i32 %row9, %i10
+  store i32 %8, ptr %j, align 4
+  br label %cond11
+
+cond11:                                           ; preds = %last
+  %col12 = load i32, ptr %col3, align 4
+  %j13 = load i32, ptr %j, align 4
+  %9 = sub nsw i32 %col12, %j13
+  %10 = add nsw i32 %9, 1
+  %11 = icmp slt i32 0, %10
+  %12 = sext i1 %11 to i32
+  %13 = icmp ne i32 %12, 0
+  br i1 %13, label %nextBB, label %falseBB
+
+nextBB:                                           ; preds = %cond11
+  %board14 = load ptr, ptr %board1, align 8
+  %i15 = load i32, ptr %i, align 4
+  %14 = getelementptr inbounds [10 x i32], ptr %board14, i32 %i15
+  %15 = load [10 x i32], ptr %14, align 4
+  %col16 = load i32, ptr %col3, align 4
+  %j17 = load i32, ptr %j, align 4
+  %16 = sub nsw i32 %col16, %j17
+  %17 = getelementptr inbounds i32, ptr %14, i32 %16
+  %18 = load i32, ptr %17, align 4
+  %19 = icmp ne i32 %18, 0
+  %20 = zext i1 %19 to i32
+  br label %mergeBB
+
+falseBB:                                          ; preds = %cond11
+  br label %mergeBB
+
+mergeBB:                                          ; preds = %falseBB, %nextBB
+  %21 = phi i32 [ %20, %nextBB ], [ 0, %falseBB ]
+  %22 = icmp ne i32 %21, 0
+  br i1 %22, label %then18, label %last19
+
+then18:                                           ; preds = %mergeBB
+  ret i32 1
+  br label %last19
+
+last19:                                           ; preds = %then18, %mergeBB
+  br label %cond20
+
+cond20:                                           ; preds = %last19
+  %col22 = load i32, ptr %col3, align 4
+  %j23 = load i32, ptr %j, align 4
+  %23 = add nsw i32 %col22, %j23
+  %24 = icmp slt i32 %23, 10
+  %25 = sext i1 %24 to i32
+  %26 = icmp ne i32 %25, 0
+  br i1 %26, label %nextBB21, label %falseBB28
+
+nextBB21:                                         ; preds = %cond20
+  %board24 = load ptr, ptr %board1, align 8
+  %i25 = load i32, ptr %i, align 4
+  %27 = getelementptr inbounds [10 x i32], ptr %board24, i32 %i25
+  %28 = load [10 x i32], ptr %27, align 4
+  %col26 = load i32, ptr %col3, align 4
+  %j27 = load i32, ptr %j, align 4
+  %29 = add nsw i32 %col26, %j27
+  %30 = getelementptr inbounds i32, ptr %27, i32 %29
+  %31 = load i32, ptr %30, align 4
+  %32 = icmp ne i32 %31, 0
+  %33 = zext i1 %32 to i32
+  br label %mergeBB29
+
+falseBB28:                                        ; preds = %cond20
+  br label %mergeBB29
+
+mergeBB29:                                        ; preds = %falseBB28, %nextBB21
+  %34 = phi i32 [ %33, %nextBB21 ], [ 0, %falseBB28 ]
+  %35 = icmp ne i32 %34, 0
+  br i1 %35, label %then30, label %last31
+
+then30:                                           ; preds = %mergeBB29
+  ret i32 1
+  br label %last31
+
+last31:                                           ; preds = %then30, %mergeBB29
+  br label %for.inc
+
+for.inc:                                          ; preds = %last31
+  %i32 = load i32, ptr %i, align 4
+  %36 = add i32 %i32, 1
+  store i32 %36, ptr %i, align 4
+  br label %for.cond
+
+for.last:                                         ; preds = %for.cond
+  ret i32 0
+}
+
+define i32 @solve(ptr %board, i32 %row) {
+entry:
+  %i = alloca i32, align 4
+  %board1 = alloca ptr, align 8
+  store ptr %board, ptr %board1, align 8
+  %row2 = alloca i32, align 4
+  store i32 %row, ptr %row2, align 4
+  br label %cond
+
+cond:                                             ; preds = %entry
+  %row3 = load i32, ptr %row2, align 4
+  %0 = icmp sgt i32 %row3, 9
+  %1 = sext i1 %0 to i32
+  %2 = icmp ne i32 %1, 0
+  br i1 %2, label %then, label %last
+
+then:                                             ; preds = %cond
+  %board4 = load ptr, ptr %board1, align 8
+  %3 = call i32 @print_board(ptr %board4)
+  ret i32 0
+  br label %last
+
+last:                                             ; preds = %then, %cond
+  br label %for.init
+
+for.init:                                         ; preds = %last
+  store i32 0, ptr %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc, %for.init
+  %i5 = load i32, ptr %i, align 4
+  %4 = icmp slt i32 %i5, 10
+  %5 = sext i1 %4 to i32
+  %6 = icmp ne i32 %5, 0
+  br i1 %6, label %for.body, label %for.last
+
+for.body:                                         ; preds = %for.cond
+  br label %cond6
+
+cond6:                                            ; preds = %for.body
+  %board7 = load ptr, ptr %board1, align 8
+  %row8 = load i32, ptr %row2, align 4
+  %i9 = load i32, ptr %i, align 4
+  %7 = call i32 @conflict(ptr %board7, i32 %row8, i32 %i9)
+  %8 = icmp ne i32 %7, 0
+  br i1 %8, label %then10, label %else
+
+then10:                                           ; preds = %cond6
+  br label %last19
+
+else:                                             ; preds = %cond6
+  %board11 = load ptr, ptr %board1, align 8
+  %row12 = load i32, ptr %row2, align 4
+  %9 = getelementptr inbounds [10 x i32], ptr %board11, i32 %row12
+  %10 = load [10 x i32], ptr %9, align 4
+  %i13 = load i32, ptr %i, align 4
+  %11 = getelementptr inbounds i32, ptr %9, i32 %i13
+  %12 = load i32, ptr %11, align 4
+  store i32 1, ptr %11, align 4
+  %board14 = load ptr, ptr %board1, align 8
+  %row15 = load i32, ptr %row2, align 4
+  %13 = add nsw i32 %row15, 1
+  %14 = call i32 @solve(ptr %board14, i32 %13)
+  %board16 = load ptr, ptr %board1, align 8
+  %row17 = load i32, ptr %row2, align 4
+  %15 = getelementptr inbounds [10 x i32], ptr %board16, i32 %row17
+  %16 = load [10 x i32], ptr %15, align 4
+  %i18 = load i32, ptr %i, align 4
+  %17 = getelementptr inbounds i32, ptr %15, i32 %i18
+  %18 = load i32, ptr %17, align 4
+  store i32 0, ptr %17, align 4
+  br label %last19
+
+last19:                                           ; preds = %else, %then10
+  br label %for.inc
+
+for.inc:                                          ; preds = %last19
+  %i20 = load i32, ptr %i, align 4
+  %19 = add i32 %i20, 1
+  store i32 %19, ptr %i, align 4
+  br label %for.cond
+
+for.last:                                         ; preds = %for.cond
+  ret i32 0
+}
+
+define i32 @main() {
+entry:
+  %i = alloca i32, align 4
+  %board = alloca [100 x i32], align 4
+  br label %for.init
+
+for.init:                                         ; preds = %entry
+  store i32 0, ptr %i, align 4
+  br label %for.cond
+
+for.cond:                                         ; preds = %for.inc, %for.init
+  %i1 = load i32, ptr %i, align 4
+  %0 = icmp slt i32 %i1, 100
+  %1 = sext i1 %0 to i32
+  %2 = icmp ne i32 %1, 0
+  br i1 %2, label %for.body, label %for.last
+
+for.body:                                         ; preds = %for.cond
+  %board2 = load [100 x i32], ptr %board, align 4
+  %i3 = load i32, ptr %i, align 4
+  %3 = getelementptr inbounds i32, ptr %board, i32 %i3
+  %4 = load i32, ptr %3, align 4
+  store i32 0, ptr %3, align 4
+  br label %for.inc
+
+for.inc:                                          ; preds = %for.body
+  %i4 = load i32, ptr %i, align 4
+  %5 = add i32 %i4, 1
+  store i32 %5, ptr %i, align 4
+  br label %for.cond
+
+for.last:                                         ; preds = %for.cond
+  %board5 = load [100 x i32], ptr %board, align 4
+  %6 = call i32 @solve(ptr %board, i32 0)
+  ret i32 0
+}
+subc: /home/ubuntu/subc-llvm/main.cc:49: int main(int, char**): Assertion `!llvm::verifyModule(*module)' failed.
